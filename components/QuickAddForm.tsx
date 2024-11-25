@@ -42,10 +42,20 @@ export default function QuickAddForm({ currentUrl, onAdd, onCancel }: Props) {
       id: Date.now().toString(),
       name: trimmedName,
       environments: {
-        local: environment === "local" ? currentUrl.host : null,
-        dev: environment === "dev" ? currentUrl.host : null,
-        prod: environment === "prod" ? currentUrl.host : null
-      }
+        local:
+          environment === "local"
+            ? { domain: currentUrl.host, protocol: currentUrl.protocol + "//" }
+            : null,
+        dev:
+          environment === "dev"
+            ? { domain: currentUrl.host, protocol: currentUrl.protocol + "//" }
+            : null,
+        prod:
+          environment === "prod"
+            ? { domain: currentUrl.host, protocol: currentUrl.protocol + "//" }
+            : null
+      },
+      envOrder: ["local", "dev", "prod"]
     }
 
     onAdd(newGroup)

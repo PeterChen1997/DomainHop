@@ -38,7 +38,7 @@ export default function Options() {
     }
     document.addEventListener("keydown", handleKeyPress)
     return () => document.removeEventListener("keydown", handleKeyPress)
-  }, [groups])
+  }, [])
 
   const debouncedSave = useCallback(
     debounce((updatedGroups: DomainGroup[]) => {
@@ -84,10 +84,11 @@ export default function Options() {
       id: Date.now().toString(),
       name: "New Group",
       environments: {
-        local: "",
-        dev: "",
-        prod: ""
-      }
+        local: { domain: "", protocol: "http://" },
+        dev: { domain: "", protocol: "https://" },
+        prod: { domain: "", protocol: "https://" }
+      },
+      envOrder: ["local", "dev", "prod"]
     }
     const updatedGroups = [...groups, newGroup]
     setGroups(updatedGroups)
@@ -96,9 +97,15 @@ export default function Options() {
     setTimeout(() => setSaveIndicator(false), 2000)
   }
 
+  const handleGroupUpdate = (updatedGroup: DomainGroup) => {
+    debouncedSave(
+      groups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-8">
+      <div className="max-w-[1186px] mx-auto p-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -131,13 +138,7 @@ export default function Options() {
               className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
               <DomainGroupForm
                 group={group}
-                onSave={(updatedGroup) => {
-                  const updatedGroups = groups.map((g) =>
-                    g.id === updatedGroup.id ? updatedGroup : g
-                  )
-                  setGroups(updatedGroups)
-                  debouncedSave(updatedGroups)
-                }}
+                onSave={handleGroupUpdate}
                 onDelete={handleDelete}
               />
             </div>

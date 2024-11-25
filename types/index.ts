@@ -1,13 +1,16 @@
 export interface Environment {
-  local: string
-  dev: string
-  prod: string
+  [key: string]: {
+    domain: string | null
+    protocol: string
+  } | null
 }
 
 export interface DomainGroup {
   id: string
   name: string
-  environments?: Environment
+  environments: Environment
+  envOrder: string[]
 }
 
-export type EnvironmentType = keyof Environment
+export const PROTOCOLS = ["http://", "https://"] as const
+export type Protocol = (typeof PROTOCOLS)[number]

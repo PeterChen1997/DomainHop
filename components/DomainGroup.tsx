@@ -10,15 +10,6 @@ interface Props {
   onDelete: (id: string) => void
 }
 
-const environments: {
-  key: EnvironmentType
-  label: string
-}[] = [
-  { key: "local", label: "Local" },
-  { key: "dev", label: "Dev" },
-  { key: "prod", label: "Prod" }
-]
-
 export default function DomainGroup({
   group,
   currentHost,
@@ -73,24 +64,24 @@ export default function DomainGroup({
       )}
 
       <div className="grid grid-cols-3 gap-2 w-full">
-        {environments.map((env) => {
-          const domainExists = !!group.environments[env.key]
+        {group.envOrder.map((key) => {
+          const domainExists = !!group.environments[key]
           return (
             <button
-              key={env.key}
-              onClick={(e) => onSwitch(group, env.key, e.metaKey || e.ctrlKey)}
+              key={key}
+              onClick={(e) => onSwitch(group, key, e.metaKey || e.ctrlKey)}
               disabled={!domainExists}
               className={`
                 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full
                 ${
-                  currentHost === group.environments[env.key]
+                  currentHost === group.environments[key].domain
                     ? "bg-blue-500 text-white"
                     : domainExists
                       ? "bg-gray-50 text-gray-700 hover:bg-gray-100"
                       : "bg-gray-100 text-gray-400 cursor-not-allowed"
                 }
               `}>
-              {env.label}
+              {key}
             </button>
           )
         })}

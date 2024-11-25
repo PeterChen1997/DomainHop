@@ -34,10 +34,13 @@ export default function IndexPopup() {
 
     const groups = (await getDomainGroups()).filter((group) =>
       Object.values(group.environments).some(
-        (domain?: string) =>
-          domain && domain?.toLowerCase() === currentUrl?.host.toLowerCase()
+        (env?: { domain: string; protocol: string }) =>
+          env?.domain?.toLowerCase() === currentUrl?.host.toLowerCase()
       )
     )
+
+    console.log(groups)
+
     setDomainGroups(groups)
     setHasMatch(groups.length > 0)
   }
@@ -49,8 +52,12 @@ export default function IndexPopup() {
   ) => {
     if (!currentUrl) return
 
+    const targetEnvironment = group.environments[targetEnv]
+    if (!targetEnvironment?.domain) return
+
     const newUrl = new URL(currentUrl.toString())
-    newUrl.host = group.environments[targetEnv]
+    newUrl.protocol = targetEnvironment.protocol.replace("://", "")
+    newUrl.host = targetEnvironment.domain
 
     if (newTab) {
       chrome.tabs.create({ url: newUrl.toString() })

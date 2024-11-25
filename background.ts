@@ -61,11 +61,10 @@ const updateIconState = async (tabId: number) => {
 
     const isActive = groups.some((group) =>
       Object.values(group.environments).some(
-        (domain?: string) =>
-          domain && domain?.toLowerCase() === currentHost.toLowerCase()
+        (env?: { domain: string; protocol: string }) =>
+          env?.domain?.toLowerCase() === currentHost.toLowerCase()
       )
     )
-    console.log(currentHost, isActive)
 
     await chrome.action.setIcon({
       imageData: isActive ? activeIconImage : inactiveIconImage
