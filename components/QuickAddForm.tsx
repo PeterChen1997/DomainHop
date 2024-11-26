@@ -32,6 +32,8 @@ export default function QuickAddForm({ currentUrl, onAdd, onCancel }: Props) {
       return
     }
 
+    console.log(currentUrl)
+
     // If current URL is required but not available
     if (!currentUrl?.host) {
       setError("Current URL is invalid!")

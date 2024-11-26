@@ -13,11 +13,15 @@ const Toast = ({
   type = "success"
 }: {
   message: string
-  type?: "success" | "error"
+  type?: "success" | "error" | "warning"
 }) => (
   <div
     className={`fixed bottom-6 right-6 px-4 py-2 rounded-lg shadow-lg animate-fade-in ${
-      type === "success" ? "bg-green-500" : "bg-red-500"
+      type === "success"
+        ? "bg-green-500"
+        : type === "warning"
+          ? "bg-yellow-500"
+          : "bg-red-500"
     } text-white`}>
     {message}
   </div>
@@ -27,9 +31,13 @@ export default function Options() {
   const [groups, setGroups] = useState<DomainGroup[]>([])
   const [saveIndicator, setSaveIndicator] = useState(false)
   const [showEmptyWarning, setShowEmptyWarning] = useState(false)
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false)
 
   useEffect(() => {
     loadGroups()
+  }, [])
+
+  useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault()
@@ -38,7 +46,7 @@ export default function Options() {
     }
     document.addEventListener("keydown", handleKeyPress)
     return () => document.removeEventListener("keydown", handleKeyPress)
-  }, [])
+  }, [groups])
 
   const debouncedSave = useCallback(
     debounce((updatedGroups: DomainGroup[]) => {
@@ -70,8 +78,8 @@ export default function Options() {
   }
 
   const addNewGroup = async () => {
-    const hasEmptyForm = groups.some(
-      (g) => !g.name || Object.values(g.environments).every((v) => !v)
+    const hasEmptyForm = groups.some((g) =>
+      Object.values(g.environments).every((v) => !v.domain)
     )
 
     if (hasEmptyForm) {
@@ -80,9 +88,18 @@ export default function Options() {
       return
     }
 
+    let newGroupName = "New Group"
+    let counter = 1
+    while (
+      groups.some((g) => g.name.toLowerCase() === newGroupName.toLowerCase())
+    ) {
+      newGroupName = `New Group ${counter}`
+      counter++
+    }
+
     const newGroup: DomainGroup = {
       id: Date.now().toString(),
-      name: "New Group",
+      name: newGroupName,
       environments: {
         local: { domain: "", protocol: "http://" },
         dev: { domain: "", protocol: "https://" },
@@ -98,6 +115,18 @@ export default function Options() {
   }
 
   const handleGroupUpdate = (updatedGroup: DomainGroup) => {
+    const isDuplicateName = groups.some(
+      (g) =>
+        g.id !== updatedGroup.id &&
+        g.name.toLowerCase() === updatedGroup.name.toLowerCase()
+    )
+
+    if (isDuplicateName) {
+      setShowDuplicateWarning(true)
+      setTimeout(() => setShowDuplicateWarning(false), 3000)
+      return
+    }
+
     debouncedSave(
       groups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
     )
@@ -122,6 +151,9 @@ export default function Options() {
               <Plus size={18} />
               Add New Group
             </button>
+            {showDuplicateWarning && (
+              <Toast message="Group name must be unique" type="warning" />
+            )}
             {showEmptyWarning && (
               <Toast
                 message="Please fill in the empty group first"

@@ -15,8 +15,7 @@ export default function DomainGroupForm({ group, onSave, onDelete }: Props) {
   const [newEnvName, setNewEnvName] = useState("")
   const [showAddEnv, setShowAddEnv] = useState(false)
   const [editingEnvName, setEditingEnvName] = useState<string | null>(null)
-
-  console.log(formData)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleChange = useCallback(
     (
@@ -32,8 +31,16 @@ export default function DomainGroupForm({ group, onSave, onDelete }: Props) {
 
   const addNewEnvironment = () => {
     const envName = newEnvName.toLowerCase().trim()
-    if (!envName || formData.envOrder.includes(envName)) return
+    if (!envName) {
+      setErrorMessage("Please enter an environment name")
+      return
+    }
+    if (formData.envOrder.includes(envName)) {
+      setErrorMessage("This environment name already exists")
+      return
+    }
 
+    setErrorMessage(null)
     const newEnvOrder = [...formData.envOrder, envName]
     const newEnvironments = {
       ...formData.environments,
@@ -208,10 +215,16 @@ export default function DomainGroupForm({ group, onSave, onDelete }: Props) {
               <input
                 type="text"
                 value={newEnvName}
-                onChange={(e) => setNewEnvName(e.target.value)}
+                onChange={(e) => {
+                  setNewEnvName(e.target.value)
+                  setErrorMessage(null)
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
                 placeholder="Environment name (e.g. staging)"
               />
+              {errorMessage && (
+                <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+              )}
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowAddEnv(false)}

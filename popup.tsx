@@ -57,7 +57,13 @@ export default function IndexPopup() {
 
     const newUrl = new URL(currentUrl.toString())
     newUrl.protocol = targetEnvironment.protocol.replace("://", "")
-    newUrl.host = targetEnvironment.domain
+
+    if (targetEnvironment.domain.includes(":")) {
+      newUrl.host = targetEnvironment.domain
+    } else {
+      newUrl.hostname = targetEnvironment.domain
+      newUrl.port = ""
+    }
 
     if (newTab) {
       chrome.tabs.create({ url: newUrl.toString() })
