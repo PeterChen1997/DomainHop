@@ -51,6 +51,7 @@ cd domainswitcher
 
 ```bash
 pnpm install
+```
 
 3. Start development server
 
